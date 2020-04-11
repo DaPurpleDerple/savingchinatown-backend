@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-DEBUG = int(os.environ.get("DEBUG", default=0))
+DEBUG = int(os.environ.get("DEBUG", default=0)) == 1
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 
@@ -75,15 +75,15 @@ WSGI_APPLICATION = 'carebackend.wsgi.application'
 
 DATABASES = {
     'default': {
+        'NAME': 'postgres',
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'HOST': os.environ.get("DB_HOST", "localhost"),
         'PORT': os.environ.get("DB_PORT", 5432),
         'OPTIONS': {
             'options': '-c search_path=django,supportlocal,public'
         },
-        'USER': 'supportlocal',
-        'PASSWORD': 'supp0rtl0cal',
-        'NAME': 'postgres'
+        'USER': 'postgres',
+        'PASSWORD': os.environ.get("DB_PASSWORD"),
     }
 }
 
@@ -130,7 +130,7 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'level': 'ERROR',
+            'level': 'DEBUG',
             'handlers': ['console'],
         },
     }
