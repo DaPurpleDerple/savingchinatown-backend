@@ -1,6 +1,14 @@
 version: '3.7'
 
 services:
+    db_postgres:
+        ports:
+            - "5432:5432"
+        image: postgis/postgis
+        volumes:
+            - ./postgres-data:/var/lib/postgresql/data/
+        environment:
+            - POSTGRES_PASSWORD=testing
     backend:
         build:
             context: ./backend
@@ -9,12 +17,14 @@ services:
         command: bash -c "pip install -r requirements.txt && python manage.py runserver 0.0.0.0:8000"
         working_dir: /usr/local/site/
         volumes:
-        - ./backend/:/usr/local/site/
-        - ../certificates/private_keys.py:/usr/local/site/carebackend/private_keys.py
+            - ./backend/:/usr/local/site/
+            - ../certificates/private_keys.py:/usr/local/site/carebackend/private_keys.py
         ports:
-        - 8000:8000
+            - 8000:8000
+        depends_on:
+            - db_postgres
         env_file:
-        - ./.env.dev
+            - ./.env.dev
     frontend:
         build:
             context: ./nginx
@@ -25,8 +35,8 @@ services:
         depends_on:
             - backend
         volumes:
-        - ./nginx/build/:/usr/local/build/
-        - ../certificates/letsencrypt/:/etc/letsencrypt/
-        - ./backend/carebackend/django-static/:/usr/local/django-static/
-        - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
-        - ../certificates/nginx_auth:/etc/nginx/nginx_auth
+            - ./nginx/build/:/usr/local/build/
+            - ../certificates/letsencrypt/:/etc/letsencrypt/
+            - ./backend/carebackend/django-static/:/usr/local/django-static/
+            - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+            - ../certificates/nginx_auth:/etc/nginx/nginx_auth
