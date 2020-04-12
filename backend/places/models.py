@@ -50,8 +50,9 @@ class Neighborhood(models.Model):
     places = models.ManyToManyField(through='NeighborhoodEntry', to='Place')
     lat = models.FloatField()
     lng = models.FloatField()
-    geom = models.PointField(srid=4326, null=True)
-    bounds = models.PolygonField(srid=4326, null=True, blank=True)
+    radius = models.FloatField()
+    geom = models.PointField(editable=False, srid=4326 null=True)
+    # bounds = models.PolygonField(srid=4326, null=True, blank=True)
     photo_url = models.URLField(blank=True, null=True, max_length=1000)
     photo_attribution = models.TextField(blank=True, null=True)
     area = models.ForeignKey(to='Area', on_delete=models.SET_NULL, blank=True, null=True)
@@ -63,24 +64,34 @@ class Neighborhood(models.Model):
             to_fetch = (limit - len(hardcoded)) + 1
         else:
             to_fetch = limit + 1
-        if self.bounds:
-            close_by = Place.objects.filter(
-                Q(geom__within=self.bounds)
-            ).annotate(
-                has_card=models.Count('gift_card_url')
-            ).exclude(
-                place_id__in=[x.place_id for x in hardcoded]
-            ).order_by('-has_card', '-num_ratings')[offset:offset + to_fetch]
-        else:
-            close_by = Place.objects.filter(
-                Q(geom__distance_lt=(self.geom, D(m=2500)))
-            ).exclude(
-                place_id__in=[x.place_id for x in hardcoded]
-            ).annotate(
-                has_card=models.Count('gift_card_url')
-            ).annotate(
-                distance=Distance('geom', self.geom)
-            ).order_by('-has_card', 'distance')[offset:offset + to_fetch]
+        # if self.bounds:
+        #     close_by = Place.objects.filter(
+        #         Q(geom__within=self.bounds)
+        #     ).annotate(
+        #         has_card=models.Count('gift_card_url')
+        #     ).exclude(
+        #         place_id__in=[x.place_id for x in hardcoded]
+        #     ).order_by('-has_card', '-num_ratings')[offset:offset + to_fetch]
+        # else:
+        #     close_by = Place.objects.filter(
+        #         Q(geom__distance_lt=(self.geom, D(m=2500)))
+        #     ).exclude(
+        #         place_id__in=[x.place_id for x in hardcoded]
+        #     ).annotate(
+        #         has_card=models.Count('gift_card_url')
+        #     ).annotate(
+        #         distance=Distance('geom', self.geom)
+        #     ).order_by('-has_card', 'distance')[offset:offset + to_fetch]
+        close_by = Place.objects.filter(
+            Q(geom__distance_lt=(self.geom, D(mi=self.radius)))
+        ).exclude(
+            place_id__in=[x.place_id for x in hardcoded]
+        ).annotate(
+            has_card=models.Count('gift_card_url')
+        ).annotate(
+            distance=Distance('geom', self.geom)
+        ).order_by('-has_card', 'distance')[offset:offset + to_fetch]
+
         more_available = len(close_by) == to_fetch
         if offset == 0:
             joined = (hardcoded + list(close_by))
@@ -97,7 +108,7 @@ class Neighborhood(models.Model):
         }
 
     def save(self, *args, **kwargs):
-        if (self.lat and self.lng):
+        if self.lat and self.lng:
             self.geom = Point([float(x) for x in (self.lng, self.lat)], srid=4326)
 
         super(self.__class__, self).save(*args, **kwargs)
@@ -117,18 +128,19 @@ class Area(models.Model):
     def update_area_for_all_places(cls):
         for a in cls.objects.all():
             for n in Neighborhood.objects.filter(area=a):
-                if n.bounds:
-                    places = Place.objects.filter(geom__within=n.bounds)
-                else:
-                    places = Place.objects.filter(geom__distance_lt=(n.geom, D(m=5000)))
+                # if n.bounds:
+                #     places = Place.objects.filter(geom__within=n.bounds)
+                # else:
+                #     places = Place.objects.filter(geom__distance_lt=(n.geom, D(m=5000)))
+                places = Place.objects.filter(geom__distance_lt=(n.geom, D(mi=n.radius)))
                 places.update(area=a)
 
 # Create your models here.
 class Place(models.Model):
     name = models.TextField()
     place_id = models.TextField(primary_key=True)
-    lat = models.FloatField()
-    lng = models.FloatField()
+    lat = models.FloatField(editable=False)
+    lng = models.FloatField(editable=False)
     user_rating = models.FloatField()
     num_ratings = models.FloatField()
     address = models.TextField()
@@ -140,7 +152,7 @@ class Place(models.Model):
     gift_card_url = models.URLField(null=True, blank=True, max_length=1000)
     takeout_url = models.URLField(null=True, blank=True, max_length=1000)
     donation_url = models.URLField(null=True, blank=True, max_length=1000)
-    geom = models.PointField(srid=4326, null=True, blank=True)
+    geom = models.PointField(editable=False, srid=4326, null=True)
     place_types = models.TextField(null=True, blank=True)
 
     @classmethod
@@ -205,8 +217,13 @@ class Place(models.Model):
 
     def save(self, *args, **kwargs):
         from places.helper import check_link_against_blacklist
+        from places.google_places_helper import fetch_details_for_place_id
         if self.gift_card_url and not check_link_against_blacklist(self.gift_card_url):
             raise Exception("Bad Link Saved")
-        if (self.lat and self.lng):
-            self.geom = Point([float(x) for x in (self.lng, self.lat)], srid=4326)
+        # if self.lat and self.lng:
+        #     self.geom = Point([float(x) for x in (self.lng, self.lat)], srid=4326)
+        r, _, _ = fetch_details_for_place_id(self.place_id)
+        self.lat = r['geometry']['location']['lat']
+        self.lng = r['geometry']['location']['lng']
+        self.geom = Point(float(self.lng), float(self.lat), srid=4326)
         super(self.__class__, self).save(*args, **kwargs)
