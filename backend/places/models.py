@@ -51,7 +51,7 @@ class Neighborhood(models.Model):
     lat = models.FloatField()
     lng = models.FloatField()
     radius = models.FloatField()
-    geom = models.PointField(editable=False, srid=4326 null=True)
+    geom = models.PointField(editable=False, srid=4326, null=True)
     # bounds = models.PolygonField(srid=4326, null=True, blank=True)
     photo_url = models.URLField(blank=True, null=True, max_length=1000)
     photo_attribution = models.TextField(blank=True, null=True)
