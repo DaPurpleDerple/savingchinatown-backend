@@ -18,21 +18,12 @@ if len(sys.argv) > 2:
 else:
     limit = 1
 
-by_place = defaultdict(list)
-for sub in EmailSubscription.objects.filter(
-    processed=False,
-    place__gift_card_url__isnull=True,
-    place__email_contact__isnull=False
-):
-    by_place[sub.place.place_id].append(sub)
-
-by_place_items = sorted(by_place.items(), key=lambda x: len(x[1]), reverse=True)
-
 subs = EmailSubscription.objects.filter(
     processed=False,
     place__gift_card_url__isnull=False
 )[0:limit]
 
+print("Trying to send %d emails" % len(subs))
 with mail.get_connection() as connection:
     for sub in subs:
         place = sub.place
@@ -67,7 +58,7 @@ The SaveOurFaves team</p>
         message = EmailMultiAlternatives(
             subject=f"Still want to support {place_name}?",
             body=plain_email_body,
-            from_email="SaveOurFaves Team <info@saveourfaves.org>",
+            from_email="SavingChinatown Team <info@savingchinatown.org>",
             to=[to_address],
             connection=connection,
         )

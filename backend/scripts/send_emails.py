@@ -43,7 +43,7 @@ with mail.get_connection() as connection:
         html_emails_to_notify_about = "<br />".join(['<a href="mailto:%s">%s</a>' % (x, x) for x in emails_to_notify_about])
 
         plain_email_body = f"""
-Hi there from the SaveOurFaves.org team! We’re a volunteer website trying to support Bay Area businesses during the COVID-19 crisis. The following people told us via our site that they want to buy gift cards from {place_name}:
+Hi there from the SavingChinatown.org team! We’re a volunteer website trying to support East Asian businesses during the COVID-19 crisis. The following people told us via our site that they want to buy gift cards from {place_name}:
 
 {plain_emails_to_notify_about}
 
@@ -77,9 +77,9 @@ The SaveOurFaves team
         message = EmailMultiAlternatives(
             subject=f"Buying a gift card to support {place_name}",
             body=plain_email_body,
-            from_email="SaveOurFaves Team <info@saveourfaves.org>",
+            from_email="SavingChinatown Team <info@savingchinatown.org>",
             to=[to_address],
-            bcc=['m@mikeyk.co'],
+            bcc=['cuianthony1@gmail.com'],
             connection=connection,
         )
         message.attach_alternative(html_email_body, 'text/html')
