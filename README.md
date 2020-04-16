@@ -2,7 +2,7 @@ This is the backend for [SavingChinatown.org](savingchinatown.org), forked from 
 
 It's a fairly straightforward Django app with Postgres/PostGIS backing it for the 'nearby' queries. You'll also need [the React frontend](https://github.com/DaPurpleDerple/savingchinatown-frontend). It also uses `nginx` as the load balancer and file server for the static files/React app.
 
-##Setting up the server
+## Setting up the server
 * Install Docker on your machine
 * Create a `certificates` folder at `../certificates/` and place in the following:
     * HTTPS Certificates using `letsencrypt` and put the results of `/etc/letsencrypt/` into `/certificates/letsencrypt/`. If you aren't using HTTPS, edit `nginx/nginx.conf` to remove the HTTPS/letsencrypt references
@@ -34,6 +34,6 @@ python scripts/dump_places.py Places.js
 
 At that point, you can copy the `Areas.js`, `Neighborhoods.js`, and `Places.js` files into the savingchinatown-frontend repository; use them to overwrite the ones in `src/CityData/`.
 
-##Running on Prod
+## Running on Prod
 * In both `docker-compose.yml` and `.env.dev`, change the `DB_PASSWORD` field
 * Generate a new `SECRET_KEY` for `.env.dev` and set `DEBUG=0` 
