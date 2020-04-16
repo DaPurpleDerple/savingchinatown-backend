@@ -104,7 +104,9 @@ class Neighborhood(models.Model):
         return {
             "name": self.name,
             "key": self.key,
-            "image": self.photo_url
+            "image": self.photo_url,
+            "lat": self.lat,
+            "lng": self.lng
         }
 
     def save(self, *args, **kwargs):
