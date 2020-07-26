@@ -6,7 +6,7 @@ PLACES_API_ROOT = "https://maps.googleapis.com/maps/api/place"
 
 PLACES_DETAILS_URL = "{ROOT_URL}/details/json?inputtype=textquery&key={key}&place_id={place_id}&fields={fields}"
 PLACES_PHOTO_URL = "{ROOT_URL}/photo?key={key}&photoreference={photo_ref}&maxwidth={width}"
-FETCH_FIELDS = "photo,website,formatted_address,geometry,permanently_closed,type,name,rating,user_ratings_total"
+FETCH_FIELDS = "photo,website,formatted_address,geometry,type,name,rating,user_ratings_total"
 
 
 def fetch_photo_redirect(photo_ref):
