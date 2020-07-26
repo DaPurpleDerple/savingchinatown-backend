@@ -225,6 +225,8 @@ class Place(models.Model):
         # if self.lat and self.lng:
         #     self.geom = Point([float(x) for x in (self.lng, self.lat)], srid=4326)
         r, _, _ = fetch_details_for_place_id(self.place_id)
+        if not r:
+            raise Exception("Failed to fetch details from google api")
         self.lat = r['geometry']['location']['lat']
         self.lng = r['geometry']['location']['lng']
         self.geom = Point(float(self.lng), float(self.lat), srid=4326)

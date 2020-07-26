@@ -58,7 +58,9 @@ def accept_place(modeladmin, request, queryset, accept_link=True):
             p = Place(place_id=place_id)
 
             r, photo_url, photo_attrib = fetch_details_for_place_id(place_id)
-            if not r.get('rating'):  # probably not meaningful place, or Google returned NOT_FOUND
+            if not r:  # Google returned NOT_FOUND
+                raise Exception("Failed to fetch details from google api")
+            if not r.get('rating'):  # probably not meaningful place
                 suggestion.processed = True
                 suggestion.save()
                 continue
