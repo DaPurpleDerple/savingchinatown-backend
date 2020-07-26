@@ -141,10 +141,10 @@ class Area(models.Model):
                     #     places = Place.objects.filter(geom__within=n.bounds)
                     # else:
                     #     places = Place.objects.filter(geom__distance_lt=(n.geom, D(m=5000)))
-                    dist = Distance(p.geom, n.geom)
+                    dist = p.geom.distance(n.geom)
                     logger.debug(dist)
-                    if dist.mi < min_dist or not min_a:
-                        min_dist = dist.mi
+                    if dist < min_dist or not min_a:
+                        min_dist = dist
                         min_a = a
             p.area = min_a
             p.save(update_fields=['area'])
