@@ -3,7 +3,7 @@ from places.models import Place
 import logging
 import requests
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 PLACES_API_ROOT = "https://maps.googleapis.com/maps/api/place"
 
@@ -25,6 +25,7 @@ def fetch_photo_redirect(photo_ref):
 
 
 def fetch_details_for_place_id(place_id):
+    logger.info("Fetching details for place %s", place_id)
     full_url = PLACES_DETAILS_URL.format(
         ROOT_URL=PLACES_API_ROOT,
         key=settings.GOOGLE_PLACES_API_KEY,
@@ -33,8 +34,8 @@ def fetch_details_for_place_id(place_id):
     resp = requests.get(full_url)
     data = resp.json()
     if 'result' not in data:
-        logger.debug("GoogleAPI URL: " + full_url)
-        logger.debug("Response: " + str(data))
+        logger.debug("GoogleAPI URL: %s", full_url)
+        logger.debug("Response: %s", str(data))
         return {}, None, None
     r = data['result']
     photo_url = None
