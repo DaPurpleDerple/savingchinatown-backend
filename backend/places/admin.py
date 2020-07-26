@@ -101,7 +101,7 @@ update_area.short_description = "Updates the area field for selected places"
 class PlacesAdmin(admin.ModelAdmin):
     search_fields = ['name', 'place_id']
     actions = [update_area]
-    list_display = ('name', 'show_area', 'has_gift_card')
+    list_display = ('name', 'show_area', 'show_existing_gift_card_url')
 
     def show_area(self, obj):
         if obj.area:
