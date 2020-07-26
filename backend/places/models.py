@@ -4,6 +4,10 @@ from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
+import logging
+
+logger = logging.getLogger('django')
+
 
 class EmailSubscription(models.Model):
     email = models.EmailField()
@@ -12,6 +16,7 @@ class EmailSubscription(models.Model):
 
     def __str__(self):
         return "%s to %s" % (self.email, self.place.name)
+
 
 class SubmittedGiftCardLink(models.Model):
 
@@ -128,10 +133,8 @@ class Area(models.Model):
 
     @classmethod
     def update_area_for_places(cls, places):
-        a_init = cls.objects.get(id=0)
-
         for p in places:
-            min_dist, min_a = 1000, a_init
+            min_dist, min_a = 1000, None
             for a in cls.objects.all():
                 for n in Neighborhood.objects.filter(area=a):
                     # if n.bounds:
@@ -139,10 +142,12 @@ class Area(models.Model):
                     # else:
                     #     places = Place.objects.filter(geom__distance_lt=(n.geom, D(m=5000)))
                     dist = Distance(p.geom, n.geom)
-                    if dist.mi < min_dist:
+                    logger.debug(dist)
+                    if dist.mi < min_dist or not min_a:
                         min_dist = dist.mi
                         min_a = a
-            p.update(area=min_a)
+            p.area = min_a
+            p.save(update_fields=['area'])
 
 # Create your models here.
 class Place(models.Model):
