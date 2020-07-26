@@ -7,4 +7,4 @@ django.setup()
 from django.contrib.gis.measure import D
 from places.models import Neighborhood, Place, Area
 
-Area.update_area_for_all_places()
+Area.update_area_for_places(Place.objects.all())

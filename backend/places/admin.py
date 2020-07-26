@@ -85,12 +85,23 @@ def accept_place(modeladmin, request, queryset, accept_link=True):
     if any_added:
         # Note: this is a fairly expensive operation, but should be ok to run
         # once at the end of an admin action
-        Area.update_area_for_all_places()
+        Area.update_area_for_places(Place.objects.all())
+
 
 accept_place.short_description = "Add place, including any gift card link"
 
+
+def update_area(modeladmin, request, queryset):
+    Area.update_area_for_places(queryset)
+
+
+update_area.short_description = "Updates the area field for selected places"
+
+
 class PlacesAdmin(admin.ModelAdmin):
     search_fields = ['name', 'place_id']
+    actions = [update_area]
+
 
 class EntryAdmin(admin.ModelAdmin):
     autocomplete_fields = ['place']

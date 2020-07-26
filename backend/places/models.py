@@ -127,15 +127,22 @@ class Area(models.Model):
     display_name = models.TextField()
 
     @classmethod
-    def update_area_for_all_places(cls):
-        for a in cls.objects.all():
-            for n in Neighborhood.objects.filter(area=a):
-                # if n.bounds:
-                #     places = Place.objects.filter(geom__within=n.bounds)
-                # else:
-                #     places = Place.objects.filter(geom__distance_lt=(n.geom, D(m=5000)))
-                places = Place.objects.filter(geom__distance_lt=(n.geom, D(mi=n.radius)))
-                places.update(area=a)
+    def update_area_for_places(cls, places):
+        a_init = cls.objects.get(id=0)
+
+        for p in places:
+            min_dist, min_a = 1000, a_init
+            for a in cls.objects.all():
+                for n in Neighborhood.objects.filter(area=a):
+                    # if n.bounds:
+                    #     places = Place.objects.filter(geom__within=n.bounds)
+                    # else:
+                    #     places = Place.objects.filter(geom__distance_lt=(n.geom, D(m=5000)))
+                    dist = Distance(p.geom, n.geom)
+                    if dist.mi < min_dist:
+                        min_dist = dist.mi
+                        min_a = a
+            p.update(area=min_a)
 
 # Create your models here.
 class Place(models.Model):
