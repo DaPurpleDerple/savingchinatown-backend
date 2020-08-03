@@ -101,7 +101,7 @@ update_area.short_description = "Updates the area field for selected places"
 class PlacesAdmin(admin.ModelAdmin):
     search_fields = ['name', 'place_id']
     actions = [update_area]
-    list_display = ('name', 'address', 'show_area', 'show_existing_gift_card_url')
+    list_display = ('name', 'address', 'show_area', 'show_site_url', 'show_existing_gift_card_url')
 
     def show_area(self, obj):
         if obj.area:
@@ -109,10 +109,17 @@ class PlacesAdmin(admin.ModelAdmin):
         return None
 
     show_area.short_description = 'Area field'
+    
+    def show_site_url(self, obj):
+        if obj.place_url:
+            return format_html("<a target='_blank' href='{url}'>{url}</a>", url=obj.place_url)
+        return None
+
+    show_site_url.short_description = 'Restaurant Site URL'
 
     def show_existing_gift_card_url(self, obj):
         if obj.gift_card_url:
-            return format_html("<a target='_blank' href='{url}'>{url}</a>", url=obj.matched_place.gift_card_url)
+            return format_html("<a target='_blank' href='{url}'>{url}</a>", url=obj.gift_card_url)
         return None
 
     show_existing_gift_card_url.short_description = 'Existing Gift Card URL'
