@@ -1,4 +1,4 @@
-This is the backend for [SavingChinatown.org](savingchinatown.org), forked from [the code](https://github.com/mikeyk/saveourfaves-server) by Mikey K.
+This is the backend for [SavingChinatown.org](https://www.savingchinatown.org), forked from [the code](https://github.com/mikeyk/saveourfaves-server) by Mikey K.
 
 It's a fairly straightforward Django app with Postgres/PostGIS backing it for the 'nearby' queries. You'll also need [the React frontend](https://github.com/DaPurpleDerple/savingchinatown-frontend). It also uses `nginx` as the load balancer and file server for the static files/React app.
 
